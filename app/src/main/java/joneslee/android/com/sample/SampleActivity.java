@@ -1,15 +1,20 @@
 package joneslee.android.com.sample;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import joneslee.android.com.library.widget.AccordionLayout;
+
 public class SampleActivity extends AppCompatActivity {
+
+    private AccordionLayout mAccordionLayout;
+    private boolean isEnter = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,14 +23,34 @@ public class SampleActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mAccordionLayout = (AccordionLayout) findViewById(R.id.layout);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                if(isEnter) {
+                    mAccordionLayout.performEnterAnimation();
+                    isEnter = false;
+                }else {
+                    mAccordionLayout.performOutAnimation();
+                    isEnter = true;
+                }
             }
         });
+        initData();
+    }
+
+    private void initData() {
+
+        for (int i = 0; i < 15; i++) {
+            StretchItemView itemView = StretchItemView.newInstance(this);
+            itemView.setTextString(String.valueOf(i + 1));
+            itemView.setIcon(Color.rgb((int) (Math.random() * 1000 % 255), (int) (Math.random() * 1000 % 255), (int) (Math.random() * 1000 % 255)));
+
+            mAccordionLayout.addView(itemView, i);
+        }
+
     }
 
     @Override
