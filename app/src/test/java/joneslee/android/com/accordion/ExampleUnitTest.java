@@ -1,4 +1,4 @@
-package joneslee.android.com.accordion;
+package joneslee.android.com.sample;
 
 import org.junit.Test;
 
