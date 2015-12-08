@@ -14,6 +14,8 @@ import android.widget.FrameLayout;
 import java.util.ArrayList;
 
 import joneslee.android.com.library.R;
+import joneslee.android.com.library.adapter.ViewHolder;
+import joneslee.android.com.library.adapter.ViewListAdapter;
 import joneslee.android.com.library.helper.ViewTouchHelper;
 
 /**
@@ -37,14 +39,12 @@ public class AccordionLayout extends FrameLayout implements ViewTouchHelper.OnVi
   private int mMaxOffsetX;
   private int mLayoutHeight;
   private int mLayoutWidth;
-  public ArrayList<AccordionItemTransform> mAccordionItemTransforms =
+  private ArrayList<AccordionItemTransform> mAccordionItemTransforms =
       new ArrayList<AccordionItemTransform>();
   public float mLeftStart = 0.0f;
-  private boolean isFirst = true;
-  public float mItemWidthOffsetX = 0.0f;
-  public float mItemAnimWidthOffsetX = 0.0f;
-  public boolean isAnimation;
-  public float mScrollX;
+  private float mScrollX;
+
+  private ViewListAdapter mAdapter;
 
   float mScrollOffset = 0.0f;
   float mEnterOffset = 1.0f;
@@ -81,12 +81,12 @@ public class AccordionLayout extends FrameLayout implements ViewTouchHelper.OnVi
 
 
     mViewTouchHelper = new ViewTouchHelper(context, this, this);
-    initItemTransforms();
 
     ta.recycle();
   }
 
   private void initItemTransforms() {
+    mAccordionItemTransforms.clear();
     for (int i = 0; i < getChildCount(); i++) {
       AccordionItemTransform itemTransform = new AccordionItemTransform();
       itemTransform.setLeft(getVisibleItemWidth() * i + getRight() * mEnterOffset
@@ -96,6 +96,22 @@ public class AccordionLayout extends FrameLayout implements ViewTouchHelper.OnVi
           + (float) Math.pow((double) 2, (double) i) * mVisibleItemWidth * mEnterOffset);
       mAccordionItemTransforms.add(i, itemTransform);
     }
+  }
+
+  public void setAdapter(ViewListAdapter adapter) {
+    mAdapter = adapter;
+    removeAllViews();
+    for (int i = 0; i < mAdapter.getItemCount(); i++) {
+      ViewHolder viewHolder = mAdapter.createViewHolder(mContext, mAdapter.getItemViewType(i));
+      viewHolder.getItemView().setTag(Integer.valueOf(i));
+      mAdapter.bindViewHolder(viewHolder, i);
+      addView(viewHolder.getItemView());
+    }
+    performEnterAnimation();
+  }
+
+  public ArrayList<AccordionItemTransform> getAccordionItemTransforms() {
+    return mAccordionItemTransforms;
   }
 
   public int getVisibleItemWidth() {
@@ -128,18 +144,16 @@ public class AccordionLayout extends FrameLayout implements ViewTouchHelper.OnVi
 
   @Override
   protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-    if (isFirst) {
-      initItemTransforms();
-      isFirst = false;
-    }
-    for (int i = getChildCount() - 1; i >= 0; i--) {
-      View view = getChildAt(i);
-      if (mAccordionItemTransforms.size() >= i) {
-        // view layout method, set view transform in ViewGroup
-        view.layout((int) (left + mAccordionItemTransforms.get(i).getLeft()),
-            top,
-            (int) (left + mAccordionItemTransforms.get(i).getRight()),
-            top + view.getMeasuredHeight());
+    if (getChildCount() > 0) {
+      for (int i = getChildCount() - 1; i >= 0; i--) {
+        View view = getChildAt(i);
+        if (mAccordionItemTransforms.size() >= i) {
+          // view layout method, set view transform in ViewGroup
+          view.layout((int) (left + mAccordionItemTransforms.get(i).getLeft()),
+              top,
+              (int) (left + mAccordionItemTransforms.get(i).getRight()),
+              top + view.getMeasuredHeight());
+        }
       }
     }
   }
@@ -163,10 +177,8 @@ public class AccordionLayout extends FrameLayout implements ViewTouchHelper.OnVi
 
   @Override
   public void onAnimaitonChanged(float offset) {
-    isAnimation = true;
     mScrollOffset = mOffsetStart * offset;
     requestItemLayoutModel();
-    mItemAnimWidthOffsetX = offset;
     requestLayout();
   }
 
@@ -203,7 +215,6 @@ public class AccordionLayout extends FrameLayout implements ViewTouchHelper.OnVi
   private void requestWidthOffsetX(float p) {
     mScrollX = p;
     mScrollOffset = Math.max(mScrollOffset, Math.min(mOffsetStart, Math.abs(mScrollX)));
-    mItemWidthOffsetX = Math.abs(mScrollX / getChildCount());
   }
 
   @Override

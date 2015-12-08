@@ -191,7 +191,7 @@ public class ViewTouchHelper {
         mInitialMotionX = mLastMotionX = (int) ev.getX();
         mInitialMotionY = mLastMotionY = (int) ev.getY();
         recordCurrentDragIndex(mLastMotionX);
-        mVisibleX = mAccordionLayout.mAccordionItemTransforms.get(mCurrentDragIndex).getLeft();
+        mVisibleX = mAccordionLayout.getAccordionItemTransforms().get(mCurrentDragIndex).getLeft();
         mActivePointerId = ev.getPointerId(0);
         // Stop the current scroll if it is still flinging
         stopScroller();
@@ -234,7 +234,6 @@ public class ViewTouchHelper {
           setStackScroll(x - mInitialMotionX);
           mVelocityTracker.addMovement(createMotionEventForStackScroll(ev));
         }
-        mAccordionLayout.isAnimation = false;
         final ViewParent parent = mAccordionLayout.getParent();
         if (parent != null) {
           parent.requestDisallowInterceptTouchEvent(true);
@@ -250,7 +249,7 @@ public class ViewTouchHelper {
         performStretchItmesAnim(velocity, null);
 
         mAccordionItemTransforms =
-            (ArrayList<AccordionItemTransform>) mAccordionLayout.mAccordionItemTransforms.clone();
+            (ArrayList<AccordionItemTransform>) mAccordionLayout.getAccordionItemTransforms().clone();
         mActivePointerId = INACTIVE_POINTER_ID;
         mIsScrolling = false;
         mTotalPMotion = 0;
@@ -301,9 +300,6 @@ public class ViewTouchHelper {
         if (postRunnable != null) {
           postRunnable.run();
         }
-        mAccordionLayout.mItemAnimWidthOffsetX = 1.0f;
-        mAccordionLayout.mItemWidthOffsetX = 0;
-        mAccordionLayout.isAnimation = false;
         mValueAnimator.removeAllListeners();
       }
     });
@@ -367,9 +363,9 @@ public class ViewTouchHelper {
 
   /** 记录当前拖拽的Index */
   private void recordCurrentDragIndex(float scrollX) {
-    for (int i = 0; i < mAccordionLayout.mAccordionItemTransforms.size(); i++) {
-      if (scrollX >= mAccordionLayout.mAccordionItemTransforms.get(i).getLeft()
-          && scrollX < mAccordionLayout.mAccordionItemTransforms.get(i).getRight()) {
+    for (int i = 0; i < mAccordionLayout.getAccordionItemTransforms().size(); i++) {
+      if (scrollX >= mAccordionLayout.getAccordionItemTransforms().get(i).getLeft()
+          && scrollX < mAccordionLayout.getAccordionItemTransforms().get(i).getRight()) {
         mCurrentDragIndex = i;
         break;
       }
@@ -378,18 +374,18 @@ public class ViewTouchHelper {
 
   /** 记录当前左右边界view的Index */
   public void recordCurrentVisibleIndex() {
-    for (int i = 0; i < mAccordionLayout.mAccordionItemTransforms.size(); i++) {
-      if (0 >= mAccordionLayout.mAccordionItemTransforms.get(i).getLeft()
-          && 0 < mAccordionLayout.mAccordionItemTransforms.get(i).getRight()) {
+    for (int i = 0; i < mAccordionLayout.getAccordionItemTransforms().size(); i++) {
+      if (0 >= mAccordionLayout.getAccordionItemTransforms().get(i).getLeft()
+          && 0 < mAccordionLayout.getAccordionItemTransforms().get(i).getRight()) {
         mCurrentLocationLeftIndex = i;
         break;
       }
     }
 
-    for (int i = mAccordionLayout.mAccordionItemTransforms.size() - 1; i >= 0; i--) {
-      if (mAccordionLayout.getRight() <= mAccordionLayout.mAccordionItemTransforms.get(i)
+    for (int i = mAccordionLayout.getAccordionItemTransforms().size() - 1; i >= 0; i--) {
+      if (mAccordionLayout.getRight() <= mAccordionLayout.getAccordionItemTransforms().get(i)
           .getRight()
-          && mAccordionLayout.getRight() > mAccordionLayout.mAccordionItemTransforms.get(i)
+          && mAccordionLayout.getRight() > mAccordionLayout.getAccordionItemTransforms().get(i)
               .getLeft()) {
         mCurrentLocationRightIndex = i;
         break;

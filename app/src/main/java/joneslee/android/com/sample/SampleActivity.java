@@ -9,12 +9,15 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import joneslee.android.com.library.widget.AccordionLayout;
 
 public class SampleActivity extends AppCompatActivity {
 
     private AccordionLayout mAccordionLayout;
-    private boolean isEnter = true;
+    private boolean isEnter = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,14 +46,17 @@ public class SampleActivity extends AppCompatActivity {
 
     private void initData() {
 
-        for (int i = 0; i < 15; i++) {
-            StretchItemView itemView = StretchItemView.newInstance(this);
-            itemView.setTextString(String.valueOf(i + 1));
-            itemView.setIcon(Color.rgb((int) (Math.random() * 1000 % 255), (int) (Math.random() * 1000 % 255), (int) (Math.random() * 1000 % 255)));
-
-            mAccordionLayout.addView(itemView, i);
+        ArrayList<SampleModel> models = new ArrayList<>();
+        for(int i = 0; i < 10; ++i)
+        {
+            Random random = new Random();
+            random.setSeed(i);
+            int color = Color.argb(255, random.nextInt(255), random.nextInt(255), random.nextInt(255));
+            models.add(i, new SampleModel(String.valueOf(i), color));
         }
-
+        SampleAdapter adapter = new SampleAdapter();
+        adapter.setData(models);
+        mAccordionLayout.setAdapter(adapter);
     }
 
     @Override
